@@ -32,8 +32,14 @@ export async function getInitialState(): Promise<{
   currentUser?: API.CurrentUser;
   settings?: LayoutSettings;
 }> {
+  const ticket = getUrlQuery('ticket');
+  if (ticket) {
+    const redirect = getUrlQuery('redirect') || '/';
+    history.replace(`/user/cas?ticket=${ticket}&redirect=${redirect}`);
+  }
+
   const token = localStorage.getItem('token');
-  if (!token) {
+  if (!token && !ticket) {
     const redirect = getUrlQuery('redirect') || '/';
     history.replace(`/user/login?redirect=${redirect}`);
   }

@@ -130,6 +130,11 @@ const routes = [
     layout: false,
   },
   {
+    path: '/user/cas',
+    component: './User/CASLogin',
+    layout: false,
+  },
+  {
     component: './404',
   },
 ];

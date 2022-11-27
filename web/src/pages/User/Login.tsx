@@ -25,13 +25,14 @@ import logo from '@/assets/logo.svg';
 import { getUrlQuery } from '@/helpers';
 import Footer from '@/components/Footer';
 import styles from './Login.less';
+import LoginMethodCAS from './components/LoginMethodCAS';
 
 const Tab = Tabs.TabPane;
 
 /**
  * Login Methods List
  */
-const loginMethods: UserModule.LoginMethod[] = [LoginMethodPassword];
+const loginMethods: UserModule.LoginMethod[] = [LoginMethodCAS, LoginMethodPassword];
 
 /**
  * User Login Page

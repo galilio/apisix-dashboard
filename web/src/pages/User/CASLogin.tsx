@@ -14,32 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type React from 'react';
-
-import LoginMethodPassword from '@/pages/User/components/LoginMethodPassword';
-import type { UserModule } from '@/pages/User/typing';
+import React from 'react';
 import { getUrlQuery } from '@/helpers';
-import LoginMethodCAS from './components/LoginMethodCAS';
+import { history, request } from 'umi';
 
 /**
- * Login Methods List
- */
-const loginMethods: UserModule.LoginMethod[] = [LoginMethodCAS, LoginMethodPassword];
-
-/**
- * User Logout Page
+ * Verify ticket.
  * @constructor
  */
 const Page: React.FC = () => {
-  // run all logout method
-  loginMethods.forEach((item) => {
-    item.logout();
-  });
+  const redirect = getUrlQuery('redirect') || '/';
+  const ticket = getUrlQuery('ticket');
+  if (!ticket) {
+    history.replace('/user/login')
+  }
 
-  const redirect = getUrlQuery('redirect');
-  window.location.href = `/user/login${redirect ? `?redirect=${redirect}` : ''}`;
+  console.log("xxxxxxx", ticket);
 
-  return null;
+  request('/user/cas', {
+    method: 'POST',
+    requestType: 'json',
+    data: {
+      ticket
+    },
+  }).then((result) => {
+    localStorage.setItem('token', result.data.token);
+    history.replace(redirect);
+  })
+
+  return (
+    <></>
+  );
 };
 
 export default Page;
+ 

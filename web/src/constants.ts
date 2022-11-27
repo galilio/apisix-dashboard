@@ -35,3 +35,5 @@ export const codeMessage = {
 export const DEFAULT_GLOBAL_RULE_ID = '1';
 
 export const DELETE_FIELDS = ['id', 'create_time', 'update_time'];
+
+export const CAS_URL = 'http://192.168.1.4:8081'

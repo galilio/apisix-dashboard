@@ -19,7 +19,7 @@ package authentication
 import (
 	"reflect"
 	"time"
-
+	"net/url"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/shiningrush/droplet"
@@ -29,7 +29,10 @@ import (
 	"github.com/apisix/manager-api/internal/conf"
 	"github.com/apisix/manager-api/internal/handler"
 	"github.com/apisix/manager-api/internal/utils/consts"
+	"github.com/apisix/manager-api/internal/log"
+	"gopkg.in/cas.v2"
 )
+
 
 type Handler struct {
 }
@@ -41,6 +44,8 @@ func NewHandler() (handler.RouteRegister, error) {
 func (h *Handler) ApplyRoute(r *gin.Engine) {
 	r.POST("/apisix/admin/user/login", wgin.Wraps(h.userLogin,
 		wrapper.InputType(reflect.TypeOf(LoginInput{}))))
+	r.POST("/apisix/admin/user/cas", wgin.Wraps(h.userCAS,
+		wrapper.InputType(reflect.TypeOf(LoginCASInput{}))))
 }
 
 type UserSession struct {
@@ -53,6 +58,11 @@ type LoginInput struct {
 	Username string `json:"username" validate:"required"`
 	// password
 	Password string `json:"password" validate:"required"`
+}
+
+type LoginCASInput struct {
+	// ticket
+	Ticket string `json:"ticket" validate:"required"`
 }
 
 // swagger:operation POST /apisix/admin/user/login userLogin
@@ -95,6 +105,33 @@ func (h *Handler) userLogin(c droplet.Context) (interface{}, error) {
 	// create JWT for session
 	claims := jwt.StandardClaims{
 		Subject:   username,
+		IssuedAt:  time.Now().Unix(),
+		ExpiresAt: time.Now().Add(time.Second * time.Duration(conf.AuthConf.ExpireTime)).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, _ := token.SignedString([]byte(conf.AuthConf.Secret))
+
+	// output token
+	return &UserSession{
+		Token: signedToken,
+	}, nil
+}
+
+func (h *Handler) userCAS(c droplet.Context) (interface{}, error) {
+	input := c.Input().(*LoginCASInput)
+	url, _ := url.Parse(conf.AuthConf.CasUrl)
+	serviceUrl, _ := url.Parse(conf.AuthConf.ServiceUrl)
+	client := cas.NewRestClient(&cas.RestOptions{CasURL: url, ServiceURL: serviceUrl})
+	
+	result, err := client.ValidateServiceTicket(cas.ServiceTicket(input.Ticket))
+	if err != nil {
+		log.Errorf("failed", err)
+		return nil, consts.ErrUsernamePassword
+	}
+
+	// create JWT for session
+	claims := jwt.StandardClaims{
+		Subject:   result.User,
 		IssuedAt:  time.Now().Unix(),
 		ExpiresAt: time.Now().Add(time.Second * time.Duration(conf.AuthConf.ExpireTime)).Unix(),
 	}

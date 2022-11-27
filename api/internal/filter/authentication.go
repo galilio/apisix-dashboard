@@ -31,6 +31,7 @@ func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.URL.Path == "/apisix/admin/user/login" ||
 			c.Request.URL.Path == "/apisix/admin/tool/version" ||
+			c.Request.URL.Path == "/apisix/admin/user/cas" ||
 			!strings.HasPrefix(c.Request.URL.Path, "/apisix") {
 			c.Next()
 			return
@@ -72,11 +73,11 @@ func Authentication() gin.HandlerFunc {
 			return
 		}
 
-		if _, ok := conf.UserList[claims.Subject]; !ok {
-			log.Warnf("user not exists by token claims subject %s", claims.Subject)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, errResp)
-			return
-		}
+		// if _, ok := conf.UserList[claims.Subject]; !ok {
+		// 	log.Warnf("user not exists by token claims subject %s", claims.Subject)
+		// 	c.AbortWithStatusJSON(http.StatusUnauthorized, errResp)
+		// 	return
+		// }
 
 		c.Next()
 	}

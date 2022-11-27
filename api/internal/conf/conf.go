@@ -126,6 +126,8 @@ type Authentication struct {
 	Secret     string
 	ExpireTime int `mapstructure:"expire_time"`
 	Users      []User
+	CasUrl     string `mapstructure:"cas_url"`
+	ServiceUrl string `mapstructure:"service_url"`
 }
 
 type Config struct {

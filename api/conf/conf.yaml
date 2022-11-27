@@ -80,6 +80,8 @@ authentication:
       password: admin
     - username: user
       password: user
+  cas_url: http://192.168.1.4:8081/cas
+  service_url: http://localhost:9000/user/cas
 
 plugins:                          # plugin list (sorted in alphabetical order)
   - api-breaker

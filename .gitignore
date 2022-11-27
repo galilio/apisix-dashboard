@@ -69,3 +69,5 @@ web/public/monaco-editor/
 *.swp
 *.swo
 
+
+dag-to-lua-1.1/
